@@ -1,27 +1,43 @@
 cordova-plugin-epos2
-======
+====================
 Cordova plugin for Epson ePOS SDK(v2.6.0) for iOS and Android.
 
-Check supported device and requirement from official SDK by Epson. 
-[iOS](https://download.epson-biz.com/modules/pos/index.php?page=single_soft&cid=5670&scat=58&pcat=52)
-[Android](https://download.epson-biz.com/modules/pos/index.php?page=single_soft&cid=5669&scat=61&pcat=52)
+Integrates the Epson ePOS2 SDK for iOS and Android with a
+limited set of functions to discover and connect ePOS printers
+
+Check supported device and requirement from official SDK by Epson.
+* [iOS](https://download.epson-biz.com/modules/pos/index.php?page=single_soft&cid=5670&scat=58&pcat=52)
+* [Android](https://download.epson-biz.com/modules/pos/index.php?page=single_soft&cid=5669&scat=61&pcat=52)
+
+Install
+-------
+
+```
+cordova plugin add cordova-plugin-epos2
+```
 
 API
 ===
 
+The plugin exposes an interface object to `cordova.epos2` for direct interaction
+with the SDK functions. See `www/plugin.js` for details about the available
+functions and their arguments.
+
 ### Printer Discovery
 #### .startDiscover(successCallback, errorCallback)
-This will only search for supported printers in local area network(LAN)
+This will search for supported printers connected to your mobiel device
+via Bluetooth or available in local area network (LAN)
+
 ```
-window.epos2.startDiscover(function(deviceInfo) => {
+cordova.epos2.startDiscover(function(deviceInfo) => {
     // success callback with deviceInfo
-}, function(error) => {
+}).catch(function(error) => {
     // error callback
-})
+});
 ```
 #### .stopDiscover(successCallback, errorCallback)
 ```
-window.epos2.stopDiscover(function() => {
+cordova.epos2.stopDiscover(function() => {
     // success callback
 }, function(error) => {
     // error callback
@@ -58,3 +74,13 @@ window.epos2.print(stringData, function() => {
     // error callback
 })
 ```
+
+Platforms
+---------
+
+* iOS 9+
+* Android
+
+## License
+
+[MIT License](http://ilee.mit-license.org)

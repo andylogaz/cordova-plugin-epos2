@@ -2,7 +2,7 @@
 
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
     id="cordova-plugin-epos2"
-    version="1.0.0">
+    version="2.0.0">
     <name>Cordova Plugin ePOS2</name>
     <description></description>
     <license>MIT</license>
@@ -14,9 +14,7 @@
     <platform name="android">
       <js-module src="www/plugin.js" name="plugin">
         <runs/>
-
-        <!-- This is the window variable name you want, like window.epos2 -->
-        <clobbers target="epos2" />
+        <clobbers target="cordova.epos2" />
       </js-module>
       <config-file target="res/xml/config.xml" parent="/*">
         <feature name="epos2">
@@ -42,12 +40,19 @@
     <platform name="ios">
         <js-module src="www/plugin.js" name="plugin">
             <runs/>
-            <clobbers target="epos2" />
+            <clobbers target="cordova.epos2" />
         </js-module>
+
         <config-file target="config.xml" parent="/*">
             <feature name="epos2">
                 <param name="ios-package" value="epos2Plugin" onload="true" />
             </feature>
+        </config-file>
+
+        <config-file target="*-Info.plist" parent="UISupportedExternalAccessoryProtocols">
+          <array>
+            <string>com.epson.escpos</string>
+          </array>
         </config-file>
 
         <header-file src="src/ios/ePOS2.h" />

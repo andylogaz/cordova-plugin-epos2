@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-epos2",
-  "version": "1.0.3",
+  "version": "2.0.0",
   "cordova": {
     "id": "cordova-plugin-epos2",
     "platforms": [
@@ -22,5 +22,6 @@
     "epson",
     "printer"
   ],
-  "description": "A starting point for a Cordova Plugin"
+  "license": "MIT",
+  "description": "Cordova Plugin integrating the Epson ePOS2 SDK for iOS and Android"
 }

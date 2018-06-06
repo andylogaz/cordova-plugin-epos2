@@ -1,8 +1,10 @@
 #import <Cordova/CDVPlugin.h>
 #import "ePOS2.h"
 
-@interface epos2Plugin : CDVPlugin {
+@interface epos2Plugin : CDVPlugin
+{
     Epos2Printer *printer;
+    NSString *printerTarget;
     int printerSeries;
     int lang;
 }

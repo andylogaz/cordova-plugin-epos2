@@ -35,7 +35,7 @@ function _exec(cmd, args, callbackArgs)
         if (_errorCallback) {
           _errorCallback(err);
         }
-        reject(err);
+        reject(new Error(err));
       },
       PLUGIN_NAME,
       cmd,
@@ -55,15 +55,38 @@ var epos2 = {
    *
    * This will trigger the successCallback function for every
    * device detected to be available for printing. The device info
-   * is provided as single argument to the callback function and
-   * as a result to the resolved promise.
+   * is provided as single argument to the callback function.
    *
-   * @param {Function} [successCallback]
+   * @param {Function} successCallback
    * @param {Function} [errorCallback]
-   * @return {Promise}
+   * @return {Promise} resolves when the first device is detected or rejects if operation times out
    */
   startDiscover: function(successCallback, errorCallback) {
-    return _exec('startDiscover', [], [successCallback, errorCallback]);
+    return new Promise(function(resolve, reject) {
+      // start timer to reject promise eventually
+      var timeout = setTimeout(function() {
+        reject(new Error('Operation timed out: no devices found'));
+      }, 10000);
+
+      exec(function(result) {
+        clearTimeout(timeout);
+        if (typeof successCallback === 'function') {
+          successCallback(result);
+        }
+        resolve(result);
+        },
+        function(err) {
+          clearTimeout(timeout);
+          if (typeof errorCallback === 'function') {
+            errorCallback(err);
+          }
+          reject(new Error(err));
+        },
+        PLUGIN_NAME,
+        'startDiscover',
+        []
+      );
+    });
   },
 
   /**
@@ -112,7 +135,7 @@ var epos2 = {
    * @return {Promise}
    */
   disconnectPrinter: function(successCallback, errorCallback) {
-    return _exec('disconnectPrinter', args, arguments);
+    return _exec('disconnectPrinter', [], arguments);
   },
 
   /**

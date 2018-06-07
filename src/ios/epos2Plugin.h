@@ -5,18 +5,20 @@
 {
     Epos2Printer *printer;
     NSString *printerTarget;
+    BOOL printerConnected;
     int printerSeries;
     int lang;
 }
 
 @property (nonatomic, strong) NSString* discoverCallbackId;
-@property (nonatomic, strong) NSString* printCallbackId;
 
 // The hooks for our plugin commands
 - (void)startDiscover:(CDVInvokedUrlCommand *)command;
 - (void)stopDiscover:(CDVInvokedUrlCommand *)command;
 - (void)connectPrinter:(CDVInvokedUrlCommand *)command;
 - (void)disconnectPrinter:(CDVInvokedUrlCommand *)command;
-- (void)print:(CDVInvokedUrlCommand *)command;
+- (void)printText:(CDVInvokedUrlCommand *)command;
+- (void)printImage:(CDVInvokedUrlCommand *)command;
+- (void)sendData:(CDVInvokedUrlCommand *)command;
 
 @end

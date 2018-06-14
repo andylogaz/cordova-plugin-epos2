@@ -4,6 +4,8 @@
 @interface epos2Plugin : CDVPlugin
 {
     Epos2Printer *printer;
+    Epos2PrinterStatusInfo *printerStatus;
+    NSString *sendDataCallbackId;
     NSString *printerTarget;
     BOOL printerConnected;
     int printerSeries;

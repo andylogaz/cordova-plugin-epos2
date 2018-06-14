@@ -11,33 +11,35 @@ static NSDictionary *printerTypeMap;
 
 - (void)pluginInitialize
 {
+    sendDataCallbackId = nil;
     printerTarget = nil;
+    printerStatus = nil;
     printerConnected = NO;
     printerSeries = EPOS2_TM_M10;
     lang = EPOS2_MODEL_ANK;
     
     printerTypeMap = @{
-                       @"TM-M10":    [NSNumber numberWithInt:EPOS2_TM_M10],
-                       @"TM-M30":    [NSNumber numberWithInt:EPOS2_TM_M30],
-                       @"TM-P10":    [NSNumber numberWithInt:EPOS2_TM_P20],
-                       @"TM-P60":    [NSNumber numberWithInt:EPOS2_TM_P60],
-                       @"TM-P60II":  [NSNumber numberWithInt:EPOS2_TM_P60II],
-                       @"TM-P80":    [NSNumber numberWithInt:EPOS2_TM_P80],
-                       @"TM-T20":    [NSNumber numberWithInt:EPOS2_TM_T20],
-                       @"TM-T60":    [NSNumber numberWithInt:EPOS2_TM_T60],
-                       @"TM-T70":    [NSNumber numberWithInt:EPOS2_TM_T70],
-                       @"TM-T81":    [NSNumber numberWithInt:EPOS2_TM_T81],
-                       @"TM-T82":    [NSNumber numberWithInt:EPOS2_TM_T82],
-                       @"TM-T83":    [NSNumber numberWithInt:EPOS2_TM_T83],
-                       @"TM-T88":    [NSNumber numberWithInt:EPOS2_TM_T88],
-                       @"TM-T88VI":  [NSNumber numberWithInt:EPOS2_TM_T88],
-                       @"TM-T90":    [NSNumber numberWithInt:EPOS2_TM_T90],
-                       @"TM-T90KP":  [NSNumber numberWithInt:EPOS2_TM_T90KP],
-                       @"TM-U220":   [NSNumber numberWithInt:EPOS2_TM_U220],
-                       @"TM-U330":   [NSNumber numberWithInt:EPOS2_TM_U330],
-                       @"TM-L90":    [NSNumber numberWithInt:EPOS2_TM_L90],
-                       @"TM-H6000":  [NSNumber numberWithInt:EPOS2_TM_H6000]
-                       };
+        @"TM-M10":    [NSNumber numberWithInt:EPOS2_TM_M10],
+        @"TM-M30":    [NSNumber numberWithInt:EPOS2_TM_M30],
+        @"TM-P10":    [NSNumber numberWithInt:EPOS2_TM_P20],
+        @"TM-P60":    [NSNumber numberWithInt:EPOS2_TM_P60],
+        @"TM-P60II":  [NSNumber numberWithInt:EPOS2_TM_P60II],
+        @"TM-P80":    [NSNumber numberWithInt:EPOS2_TM_P80],
+        @"TM-T20":    [NSNumber numberWithInt:EPOS2_TM_T20],
+        @"TM-T60":    [NSNumber numberWithInt:EPOS2_TM_T60],
+        @"TM-T70":    [NSNumber numberWithInt:EPOS2_TM_T70],
+        @"TM-T81":    [NSNumber numberWithInt:EPOS2_TM_T81],
+        @"TM-T82":    [NSNumber numberWithInt:EPOS2_TM_T82],
+        @"TM-T83":    [NSNumber numberWithInt:EPOS2_TM_T83],
+        @"TM-T88":    [NSNumber numberWithInt:EPOS2_TM_T88],
+        @"TM-T88VI":  [NSNumber numberWithInt:EPOS2_TM_T88],
+        @"TM-T90":    [NSNumber numberWithInt:EPOS2_TM_T90],
+        @"TM-T90KP":  [NSNumber numberWithInt:EPOS2_TM_T90KP],
+        @"TM-U220":   [NSNumber numberWithInt:EPOS2_TM_U220],
+        @"TM-U330":   [NSNumber numberWithInt:EPOS2_TM_U330],
+        @"TM-L90":    [NSNumber numberWithInt:EPOS2_TM_L90],
+        @"TM-H6000":  [NSNumber numberWithInt:EPOS2_TM_H6000]
+    };
 }
 
 - (void)startDiscover:(CDVInvokedUrlCommand *)command
@@ -63,7 +65,7 @@ static NSDictionary *printerTypeMap;
     result = [Epos2Discovery start:filteroption_ delegate:self];
     if (EPOS2_SUCCESS != result) {
         NSLog(@"[epos2] Error in startDiscover()");
-        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error in discovering printer."];
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error 0x00001: Printer discovery failed"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     }
 }
@@ -72,13 +74,13 @@ static NSDictionary *printerTypeMap;
 {
     NSLog(@"[epos2] onDiscovery: %@ (%@)", [deviceInfo getTarget], [deviceInfo getDeviceName]);
     NSDictionary *info = @{
-                           @"target": [deviceInfo getTarget],
-                           @"deviceType": [NSNumber numberWithInt:[deviceInfo getDeviceType]],
-                           @"deviceName": [deviceInfo getDeviceName],
-                           @"ipAddress" : [deviceInfo getIpAddress],
-                           @"macAddress": [deviceInfo getMacAddress],
-                           @"bdAddress": [deviceInfo getBdAddress],
-                           };
+        @"target": [deviceInfo getTarget],
+        @"deviceType": [NSNumber numberWithInt:[deviceInfo getDeviceType]],
+        @"deviceName": [deviceInfo getDeviceName],
+        @"ipAddress" : [deviceInfo getIpAddress],
+        @"macAddress": [deviceInfo getMacAddress],
+        @"bdAddress": [deviceInfo getBdAddress],
+    };
     CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:info];
     [result setKeepCallbackAsBool:YES];
     [self.commandDelegate sendPluginResult:result callbackId:self.discoverCallbackId];
@@ -99,7 +101,7 @@ static NSDictionary *printerTypeMap;
     
     if (EPOS2_SUCCESS != result) {
         NSLog(@"[epos2] Error in stopDiscover()");
-        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error in stop discovering printer."];
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error 0x00002: Stopping discovery failed."];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     }
 }
@@ -130,7 +132,7 @@ static NSDictionary *printerTypeMap;
         if (result == EPOS2_SUCCESS) {
             target = BDAddress;
         } else {
-            CDVPluginResult *cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error in bluetooth connect."];
+            CDVPluginResult *cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error 0x00010: Bluetooth connection failed"];
             [self.commandDelegate sendPluginResult:cordovaResult callbackId:command.callbackId];
             return;
         }
@@ -140,7 +142,7 @@ static NSDictionary *printerTypeMap;
     
     // check for existing connection
     if (printer != nil && printerConnected && ![printerTarget isEqual:target]) {
-        CDVPluginResult *cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Printer already connected"];
+        CDVPluginResult *cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error 0x00011: Printer already connected"];
         [self.commandDelegate sendPluginResult:cordovaResult callbackId:command.callbackId];
         return;
     }
@@ -152,7 +154,7 @@ static NSDictionary *printerTypeMap;
         CDVPluginResult *cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:YES];
         [self.commandDelegate sendPluginResult:cordovaResult callbackId:command.callbackId];
     } else {
-        CDVPluginResult *cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error in connect  printer."];
+        CDVPluginResult *cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error 0x00012: Connecting printer failed"];
         [self.commandDelegate sendPluginResult:cordovaResult callbackId:command.callbackId];
     }
 }
@@ -161,7 +163,9 @@ static NSDictionary *printerTypeMap;
 {
     int result = EPOS2_SUCCESS;
     CDVPluginResult *cordovaResult = nil;
-    
+
+    NSLog(@"[epos2] disconnectPrinter(%@)", printer);
+  
     if (printer == nil) {
         cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:YES];
         [self.commandDelegate sendPluginResult:cordovaResult callbackId:command.callbackId];
@@ -171,13 +175,13 @@ static NSDictionary *printerTypeMap;
     result = [printer endTransaction];
     if (result != EPOS2_SUCCESS) {
         NSLog(@"[epos2] Error in Epos2Printer.endTransaction(): %d", result);
-        cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error in disconnectPrinter()"];
+        cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error 0x00020: Ending transaction failed"];
     }
     
     result = [printer disconnect];
     if (result != EPOS2_SUCCESS) {
         NSLog(@"[epos2] Error in Epos2Printer.disconnect(): %d", result);
-        cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error in disconnectPrinter()"];
+        cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error 0x00021: Disconnecting printer failed"];
     }
     [self finalizeObject];
     
@@ -186,7 +190,9 @@ static NSDictionary *printerTypeMap;
         cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:YES];
     }
     
-    [self.commandDelegate sendPluginResult:cordovaResult callbackId:command.callbackId];
+    if (command != nil) {
+        [self.commandDelegate sendPluginResult:cordovaResult callbackId:command.callbackId];
+    }
 }
 
 -(BOOL)_connectPrinter
@@ -237,6 +243,7 @@ static NSDictionary *printerTypeMap;
     [printer setReceiveEventDelegate:nil];
     
     printerConnected = NO;
+    printerStatus = nil;
     printer = nil;
 }
 
@@ -244,14 +251,20 @@ static NSDictionary *printerTypeMap;
 {
     NSLog(@"[epos2] onPtrReceive; code: %d, status: %@, printJobId: %@", code, status, printJobId);
     
-    [self disconnectPrinter:nil];
+    // [self disconnectPrinter:nil];
+    
+    // send callback for sendData command
+    if (sendDataCallbackId != nil) {
+        CDVPluginResult *cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:YES];
+        [self.commandDelegate sendPluginResult:cordovaResult callbackId:sendDataCallbackId];
+    }
 }
 
 - (void)printText:(CDVInvokedUrlCommand *)command
 {
     // (re-)connect printer with stored information
     if (![self _connectPrinter]) {
-        CDVPluginResult *cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error in printText() command: printer not connected."];
+        CDVPluginResult *cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error 0x00013: Printer is not connected"];
         [self.commandDelegate sendPluginResult:cordovaResult callbackId:command.callbackId];
         return;
     }
@@ -304,7 +317,7 @@ static NSDictionary *printerTypeMap;
         if (result == EPOS2_SUCCESS) {
             cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:YES];
         } else {
-            cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error in printText() command: failed to add data."];
+            cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error 0x00030: Failed to add text data"];
         }
         
         [self.commandDelegate sendPluginResult:cordovaResult callbackId:printCallbackId];
@@ -327,7 +340,7 @@ static NSDictionary *printerTypeMap;
     
     // (re-)connect printer with stored information
     if (![self _connectPrinter]) {
-        CDVPluginResult *cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error in printImage() command: printer not connected."];
+        CDVPluginResult *cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error 0x00013: Printer is not connected"];
         [self.commandDelegate sendPluginResult:cordovaResult callbackId:command.callbackId];
         return;
     }
@@ -358,7 +371,7 @@ static NSDictionary *printerTypeMap;
                           compress:EPOS2_COMPRESS_AUTO];
         if (result != EPOS2_SUCCESS) {
             NSLog(@"[epos2] Error in Epos2Printer.addImage(): %d", result);
-            cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error in printImage() command: failed to add data."];
+            cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error 0x00040: Failed to add image data"];
         } else {
             cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:YES];
         }
@@ -369,14 +382,18 @@ static NSDictionary *printerTypeMap;
 
 - (void)sendData:(CDVInvokedUrlCommand *)command
 {
-    Epos2PrinterStatusInfo *status = nil;
-    NSString *printCallbackId = command.callbackId;
+    sendDataCallbackId = command.callbackId;
     
-    // check printer status
-    status = [printer getStatus];
-    
-    if (![self isPrintable:status]) {
-        CDVPluginResult *cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error in print() command: printer is not ready."];
+    // check printer status (cached)
+    if (printerStatus == nil) {
+        printerStatus = [printer getStatus];
+    }
+
+    if (![self isPrintable:printerStatus]) {
+        [printer clearCommandBuffer];
+        printerStatus = nil;
+
+        CDVPluginResult *cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error 0x00050: Printer is not ready. Check device and paper."];
         [self.commandDelegate sendPluginResult:cordovaResult callbackId:command.callbackId];
         return;
     }
@@ -402,40 +419,39 @@ static NSDictionary *printerTypeMap;
         result = [printer sendData:EPOS2_PARAM_DEFAULT];
         if (result != EPOS2_SUCCESS) {
             [printer disconnect];
-            printerConnected = NO;
-            cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error in sendData(): failed to send print job"];
+            [self finalizeObject];
+            cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error 0x00051: Failed to send print job"];
+            [self.commandDelegate sendPluginResult:cordovaResult callbackId:sendDataCallbackId];
         } else {
-            cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:YES];
+            [printer clearCommandBuffer];
         }
-        
-        [self.commandDelegate sendPluginResult:cordovaResult callbackId:printCallbackId];
+      
+        // do not yet trigger callback but wait for onPtrReceive
     }];
 }
 
 - (void)getPrinterStatus:(CDVInvokedUrlCommand *)command
 {
-    Epos2PrinterStatusInfo *status = nil;
-    
     // (re-)connect printer with stored information
     if (![self _connectPrinter]) {
-        CDVPluginResult *cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error in getPrinterStatus(): printer not connected."];
+        CDVPluginResult *cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error 0x00013: Printer is not connected"];
         [self.commandDelegate sendPluginResult:cordovaResult callbackId:command.callbackId];
         return;
     }
     
     // request printer status
-    status = [printer getStatus];
+    printerStatus = [printer getStatus];
     
     // translate status into a dict for returning
     NSDictionary *info = @{
-                           @"online": [NSNumber numberWithInt:status.online],
-                           @"connection": [NSNumber numberWithInt:status.connection],
-                           @"coverOpen": [NSNumber numberWithInt:status.coverOpen],
-                           @"paper": [NSNumber numberWithInt:status.paper],
-                           @"paperFeed": [NSNumber numberWithInt:status.paperFeed],
-                           @"errorStatus": [NSNumber numberWithInt:status.errorStatus],
-                           @"isPrintable": [NSNumber numberWithBool:[self isPrintable:status]]
-                           };
+        @"online": [NSNumber numberWithInt:printerStatus.online],
+        @"connection": [NSNumber numberWithInt:printerStatus.connection],
+        @"coverOpen": [NSNumber numberWithInt:printerStatus.coverOpen],
+        @"paper": [NSNumber numberWithInt:printerStatus.paper],
+        @"paperFeed": [NSNumber numberWithInt:printerStatus.paperFeed],
+        @"errorStatus": [NSNumber numberWithInt:printerStatus.errorStatus],
+        @"isPrintable": [NSNumber numberWithBool:[self isPrintable:printerStatus]]
+    };
     
     NSLog(@"[epos2] getPrinterStatus(): %@", info);
     CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:info];

@@ -1,4 +1,4 @@
-#import "ePOS2Plugin.h"
+#import "epos2Plugin.h"
 #import <UIKit/UIKit.h>
 #import <Cordova/CDVAvailability.h>
 
@@ -249,13 +249,16 @@ static NSDictionary *printerTypeMap;
 
 - (void)onPtrReceive:(Epos2Printer *)printerObj code:(int)code status:(Epos2PrinterStatusInfo *)status printJobId:(NSString *)printJobId
 {
+    CDVPluginResult *cordovaResult;
     NSLog(@"[epos2] onPtrReceive; code: %d, status: %@, printJobId: %@", code, status, printJobId);
-    
-    // [self disconnectPrinter:nil];
     
     // send callback for sendData command
     if (sendDataCallbackId != nil) {
-        CDVPluginResult *cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:YES];
+        if (code == EPOS2_SUCCESS) {
+            cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:YES];
+        } else {
+            cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error 0x00050: Print job failed. Check the device."];
+        }
         [self.commandDelegate sendPluginResult:cordovaResult callbackId:sendDataCallbackId];
     }
 }

@@ -65,7 +65,7 @@ var epos2 = {
     return new Promise(function(resolve, reject) {
       // start timer to reject promise eventually
       var timeout = setTimeout(function() {
-        reject(new Error('Operation timed out: no devices found'));
+        reject(new Error('Error 0x00001: No devices found'));
       }, 10000);
 
       exec(function(result) {

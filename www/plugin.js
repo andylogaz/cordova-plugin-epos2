@@ -66,7 +66,7 @@ var epos2 = {
       // start timer to reject promise eventually
       var timeout = setTimeout(function() {
         reject(new Error('Error 0x00001: No devices found'));
-      }, 10000);
+      }, 20000);
 
       exec(function(result) {
         clearTimeout(timeout);

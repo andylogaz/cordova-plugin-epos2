@@ -32,7 +32,7 @@
       </config-file>
 
       <source-file src="src/android/epos2Plugin.java" target-dir="src/com/cordova/plugin" />
-      <source-file src="src/android/libepos2.so" target-dir="libs/armeabi/" />
+      <source-file src="src/android/libepos2.so" target-dir="libs/armeabi-v7a/" />
       <lib-file src="src/android/ePOS2.jar" target-dir="libs/" />
     </platform>
 

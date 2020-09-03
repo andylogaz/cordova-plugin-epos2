@@ -217,6 +217,25 @@ var epos2 = {
   },
   /**
    * 
+   * @param {*} successCallback 
+   * @param {*} errorCallback 
+   */
+  send: function(successCallback, errorCallback) {
+    return _exec('sendData', [], arguments)
+    .then(function(result) {
+      if (typeof successCallback === 'function') {
+        successCallback(result);
+      }
+    })
+    .catch(function(err) {
+      if (typeof errorCallback === 'function') {
+        errorCallback(err);
+      }
+      throw err;
+    });
+  },
+  /**
+   * 
    * @param {Function} successCallback 
    * @param {Function} errorCallback 
    */

@@ -189,7 +189,7 @@ var epos2 = {
    * @param {Function} [errorCallback]
    * @return {Promise} resolving on success, rejecting on error
    */
-  printText: function(data, textFont, textSize, textAlign, textReverse, textUnderline, textEmphasis, textColour, terminate, successCallback, errorCallback) {
+  printText: function(data, textFont, textSize, doubleWidth, doubleHeight, textAlign, textReverse, textUnderline, textEmphasis, textColour, terminate, successCallback, errorCallback) {
     // convert data argument to array
     if (!Array.isArray(data)) {
       data = [String(data)];

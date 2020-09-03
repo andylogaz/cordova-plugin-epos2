@@ -178,18 +178,28 @@ var epos2 = {
    * @param {Number} [textFont=0] Select font: 0 = Font A, 1 = Font B, 2 = Font C, 3 = Font D, 4 = Font E
    * @param {Number} [textSize=1] Define text size (1..8)
    * @param {Number} [textAlign=0] Define text alignment: 0 = left, 1 = center, 2 = right
+   * @param {Number} [textReverse=0] Define text reverse: 0 = disabled, 1 = enabled
+   * @param {Number} [textUnderline=0] Define text underline: 0 = disabled, 1 = enabled
+   * @param {Number} [textEmphasis=0] Define text bold: 0 = disabled, 1 = enabled
+   * @param {Number} [textColour=1] Define text colour: 0 = no print, 1 = default, 2 = second colour, 3 = third colour, 4 = fourth colour
+   * @param {Number} [doubleWidth=0] Define doubleWidth Printing: 0 = disabled, 1 = enabled
+   * @param {Number} [doubleHeight=0] Define doubleHeight Printing: 0 = disabled, 1 = enabled
    * @param {Boolean} [terminate=false] Send additional line feeds an a "cut" command to complete the print
    * @param {Function} [successCallback]
    * @param {Function} [errorCallback]
    * @return {Promise} resolving on success, rejecting on error
    */
-  printText: function(data, textFont, textSize, textAlign, terminate, successCallback, errorCallback) {
+  printText: function(data, textFont, textSize, textAlign, textReverse, textUnderline, textEmphasis, textColour, terminate, successCallback, errorCallback) {
     // convert data argument to array
     if (!Array.isArray(data)) {
       data = [String(data)];
     }
+    let textWidth = textSize || 1
+    let textHeight = textSize || 1
+    if(doubleWidth) textWidth *= 2
+    if(doubleHeight) textHeight *= 2
 
-    return _exec('printText', [data, textFont || 0, textSize || 1, textAlign || 0], arguments)
+    return _exec('printText', [data, textFont || 0, textWidth, textHeight, textAlign || 0, textReverse || 0, textUnderline || 0, textEmphasis || 0, textColour || 1], arguments)
       .then(function(result) {
         return terminate ? _exec('sendData', [], []) : result;
       })
@@ -204,6 +214,81 @@ var epos2 = {
         }
         throw err;
       });
+  },
+  /**
+   * 
+   * @param {Function} successCallback 
+   * @param {Function} errorCallback 
+   */
+  addFeed: function(successCallback, errorCallback) {
+    return _exec('addFeed', [], arguments)
+    .then(function(result) {
+      if (typeof successCallback === 'function') {
+        successCallback(result);
+      }
+    })
+    .catch(function(err) {
+      if (typeof errorCallback === 'function') {
+        errorCallback(err);
+      }
+      throw err;
+    });
+  },
+
+  /**
+   * 
+   * @param {Function} successCallback 
+   * @param {Function} errorCallback 
+   */
+  addCut: function(successCallback, errorCallback) {
+    return _exec('addCut', [], arguments)
+    .then(function(result) {
+      if (typeof successCallback === 'function') {
+        successCallback(result);
+      }
+    })
+    .catch(function(err) {
+      if (typeof errorCallback === 'function') {
+        errorCallback(err);
+      }
+      throw err;
+    });
+  },
+
+  /**
+   * 
+   * @param {Number} [pin = 2] Define the pin to fire (2 / 5)
+   * @param {Number} [time = 100] Define millisecond time for signal (100/200/300/400/500)
+   * @param {Function} successCallback 
+   * @param {Function} errorCallback 
+   */
+  kickDraw: function(pin, time, successCallback, errorCallback) {
+    if(pin !== 5) pin = 2
+    if(!time) time = 100
+    time = 100 * Math.Ceil(time/100)
+    if(time < 100) time = 100
+    if(time > 500) time = 500
+
+    return _exec('kickDraw', [pin, time], arguments)
+    .then(function(result) {
+      if (typeof successCallback === 'function') {
+        successCallback(result);
+      }
+    })
+    .catch(function(err) {
+      if (typeof errorCallback === 'function') {
+        errorCallback(err);
+      }
+      throw err;
+    });
+  },
+  
+  addBarcode: function(successCallback, errorCallback) {
+    errorCallback("Not yet implemented")
+  },
+  
+  addSymbol: function(successCallback, errorCallback) {
+    errorCallback("Not yet implemented")
   },
 
   /**

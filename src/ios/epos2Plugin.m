@@ -263,6 +263,99 @@ static NSDictionary *printerTypeMap;
     }
 }
 
+- (void)addFeed:(CDVInvokedUrlCommand *)command
+{
+    // (re-)connect printer with stored information
+    if (![self _connectPrinter]) {
+        CDVPluginResult *cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error 0x00013: Printer is not connected"];
+        [self.commandDelegate sendPluginResult:cordovaResult callbackId:command.callbackId];
+        return;
+    }
+    
+    NSString *printCallbackId = command.callbackId;
+
+    [self.commandDelegate runInBackground:^{
+        int result = EPOS2_SUCCESS;
+        CDVPluginResult *cordovaResult;
+        
+        result = [printer addFeedLine:1];
+        
+        if (result == EPOS2_SUCCESS) {
+            cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:YES];
+        } else {
+            cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error 0x00030: Failed to add text data"];
+        }
+        
+        [self.commandDelegate sendPluginResult:cordovaResult callbackId:printCallbackId];
+    }];
+}
+
+- (void)addCut:(CDVInvokedUrlCommand *)command
+{
+    
+    // (re-)connect printer with stored information
+    if (![self _connectPrinter]) {
+        CDVPluginResult *cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error 0x00013: Printer is not connected"];
+        [self.commandDelegate sendPluginResult:cordovaResult callbackId:command.callbackId];
+        return;
+    }
+    
+    NSString *printCallbackId = command.callbackId;
+
+    [self.commandDelegate runInBackground:^{
+        int result = EPOS2_SUCCESS;
+        CDVPluginResult *cordovaResult;
+        
+        result = [printer addCut:EPOS2_CUT_FEED];
+        
+        if (result == EPOS2_SUCCESS) {
+            cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:YES];
+        } else {
+            cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error 0x00030: Failed to add text data"];
+        }
+        
+        [self.commandDelegate sendPluginResult:cordovaResult callbackId:printCallbackId];
+    }];
+}
+
+- (void)kickDraw:(CDVInvokedUrlCommand *)command
+{
+    // (re-)connect printer with stored information
+    if (![self _connectPrinter]) {
+        CDVPluginResult *cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error 0x00013: Printer is not connected"];
+        [self.commandDelegate sendPluginResult:cordovaResult callbackId:command.callbackId];
+        return;
+    }
+    
+    NSString *printCallbackId = command.callbackId;
+    NSArray *printData = [command.arguments objectAtIndex:0];
+    int pin = EPOS2_PARAM_DEFAULT;
+    int time = EPOS2_PARAM_DEFAULT;
+    
+    // read optional arguments
+    if ([command.arguments count] > 1) {
+        pin = ((NSNumber *)[command.arguments objectAtIndex:1]).intValue;
+    }
+    if ([command.arguments count] > 2) {
+        time = ((NSNumber *)[command.arguments objectAtIndex:2]).intValue;
+    }
+
+    [self.commandDelegate runInBackground:^{
+        int result = EPOS2_SUCCESS;
+        CDVPluginResult *cordovaResult;
+        
+        result = [printer addPulse:pin time:time];
+        
+        if (result == EPOS2_SUCCESS) {
+            cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:YES];
+        } else {
+            cordovaResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Error 0x00030: Failed to add text data"];
+        }
+        
+        [self.commandDelegate sendPluginResult:cordovaResult callbackId:printCallbackId];
+    }];
+}
+
 - (void)printText:(CDVInvokedUrlCommand *)command
 {
     // (re-)connect printer with stored information
@@ -275,33 +368,56 @@ static NSDictionary *printerTypeMap;
     NSString *printCallbackId = command.callbackId;
     NSArray *printData = [command.arguments objectAtIndex:0];
     int textFont = EPOS2_PARAM_DEFAULT;
-    int textSize = EPOS2_PARAM_DEFAULT;
+    int textWidth = EPOS2_PARAM_DEFAULT;
+    int textHeight = EPOS2_PARAM_DEFAULT;
     int textAlign = EPOS2_PARAM_DEFAULT;
+    int textReverse = EPOS2_PARAM_DEFAULT;
+    int textUnderline = EPOS2_PARAM_DEFAULT;
+    int textEmphasis = EPOS2_PARAM_DEFAULT;
+    int textColour = EPOS2_PARAM_DEFAULT;
     
     // read optional arguments
     if ([command.arguments count] > 1) {
         textFont = ((NSNumber *)[command.arguments objectAtIndex:1]).intValue;
     }
     if ([command.arguments count] > 2) {
-        textSize = ((NSNumber *)[command.arguments objectAtIndex:2]).intValue;
+        textWidth = ((NSNumber *)[command.arguments objectAtIndex:2]).intValue;
     }
     if ([command.arguments count] > 3) {
-        textAlign = ((NSNumber *)[command.arguments objectAtIndex:3]).intValue;
+        textHeight = ((NSNumber *)[command.arguments objectAtIndex:3]).intValue;
     }
-    
+    if ([command.arguments count] > 4) {
+        textAlign = ((NSNumber *)[command.arguments objectAtIndex:4]).intValue;
+    }
+    if ([command.arguments count] > 5) {
+        textReverse = ((NSNumber *)[command.arguments objectAtIndex:5]).intValue;
+    }
+    if ([command.arguments count] > 6) {
+        textUnderline = ((NSNumber *)[command.arguments objectAtIndex:6]).intValue;
+    }
+    if ([command.arguments count] > 7) {
+        textEmphasis = ((NSNumber *)[command.arguments objectAtIndex:7]).intValue;
+    }
+    if ([command.arguments count] > 8) {
+        textColour = ((NSNumber *)[command.arguments objectAtIndex:8]).intValue;
+    }
+
     [self.commandDelegate runInBackground:^{
         int result = EPOS2_SUCCESS;
         CDVPluginResult *cordovaResult;
         
-        // result = [printer addTextFont:textFont];
+        result = [printer addTextFont:textFont];
         
-        // if (result == EPOS2_SUCCESS) {
-        //     result = [printer addTextSize:textSize height:textSize];
-        // }
+        if (result == EPOS2_SUCCESS) {
+            result = [printer addTextSize:textWidth height:textHeight];
+        }
         
-        // if (result == EPOS2_SUCCESS) {
-        //     result = [printer addTextAlign:textAlign];
-        // }
+        if (result == EPOS2_SUCCESS) {
+            result = [printer addTextAlign:textAlign];
+        }
+        if (result == EPOS2_SUCCESS) {
+            result = [printer addTextStyle:textReverse ul:textUnderline em:textEmphasis color:textColour];
+        }
         
         if (result == EPOS2_SUCCESS) {
             for (NSString *data in printData) {

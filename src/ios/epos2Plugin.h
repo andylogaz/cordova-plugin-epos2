@@ -22,5 +22,8 @@
 - (void)printText:(CDVInvokedUrlCommand *)command;
 - (void)printImage:(CDVInvokedUrlCommand *)command;
 - (void)sendData:(CDVInvokedUrlCommand *)command;
+- (void)addFedd:(CDVInvokedUrlCommand *)command;
+- (void)addCut:(CDVInvokedUrlCommand *)command;
+- (void)kickDraw:(CDVInvokedUrlCommand *)command;
 
 @end

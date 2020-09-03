@@ -293,15 +293,15 @@ static NSDictionary *printerTypeMap;
         int result = EPOS2_SUCCESS;
         CDVPluginResult *cordovaResult;
         
-        result = [printer addTextFont:textFont];
+        // result = [printer addTextFont:textFont];
         
-        if (result == EPOS2_SUCCESS) {
-            result = [printer addTextSize:textSize height:textSize];
-        }
+        // if (result == EPOS2_SUCCESS) {
+        //     result = [printer addTextSize:textSize height:textSize];
+        // }
         
-        if (result == EPOS2_SUCCESS) {
-            result = [printer addTextAlign:textAlign];
-        }
+        // if (result == EPOS2_SUCCESS) {
+        //     result = [printer addTextAlign:textAlign];
+        // }
         
         if (result == EPOS2_SUCCESS) {
             for (NSString *data in printData) {
@@ -406,18 +406,18 @@ static NSDictionary *printerTypeMap;
         CDVPluginResult *cordovaResult;
         
         // feed paper
-        result = [printer addFeedLine:3];
-        if (result != EPOS2_SUCCESS) {
-            NSLog(@"[epos2] Error in Epos2Printer.addFeedLine(): %d", result);
-            return;
-        }
+        // result = [printer addFeedLine:3];
+        // if (result != EPOS2_SUCCESS) {
+        //     NSLog(@"[epos2] Error in Epos2Printer.addFeedLine(): %d", result);
+        //     return;
+        // }
         
-        // send cut command
-        result = [printer addCut:EPOS2_CUT_FEED];
-        if (result != EPOS2_SUCCESS) {
-            NSLog(@"[epos2] Error in Epos2Printer.addCut(): %d", result);
-            return;
-        }
+        // // send cut command
+        // result = [printer addCut:EPOS2_CUT_FEED];
+        // if (result != EPOS2_SUCCESS) {
+        //     NSLog(@"[epos2] Error in Epos2Printer.addCut(): %d", result);
+        //     return;
+        // }
         
         result = [printer sendData:EPOS2_PARAM_DEFAULT];
         if (result != EPOS2_SUCCESS) {
